@@ -1,3 +1,6 @@
 node_modules
 npm-debug.log
 build
+lottery-dapp/node_modules
+lottery-dapp/npm-debug.log
+lottery-dapp/build
