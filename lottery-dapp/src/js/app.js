@@ -3,23 +3,6 @@ App = {
   contracts: {},
 
   init: async function() {
-    // Load pets.
-    $.getJSON('../pets.json', function(data) {
-      var petsRow = $('#petsRow');
-      var petTemplate = $('#petTemplate');
-
-      for (i = 0; i < data.length; i ++) {
-        petTemplate.find('.panel-title').text(data[i].name);
-        petTemplate.find('img').attr('src', data[i].picture);
-        petTemplate.find('.pet-breed').text(data[i].breed);
-        petTemplate.find('.pet-age').text(data[i].age);
-        petTemplate.find('.pet-location').text(data[i].location);
-        petTemplate.find('.btn-adopt').attr('data-id', data[i].id);
-
-        petsRow.append(petTemplate.html());
-      }
-    });
-
     return await App.initWeb3();
   },
 
@@ -60,17 +43,14 @@ App = {
       // return App.markAdopted();
     });
 
-    return App.bindEvents();
+    App.bindRegister();
+    App.bindAddToken();
+    App.bindSubmitLottery();
+    App.bindAdmin();
   },
 
-  bindEvents: function() {
+  bindRegister: function() {
     $(document).on('click', '.btn-register', App.handleRegister);
-  },
-
-  markAdopted: function() {
-    /*
-     * Replace me...
-     */
   },
 
   handleRegister: function(event) {
@@ -97,8 +77,99 @@ App = {
         var div = document.getElementById('registerLabel');
         div.innerHTML="Error! User already Registered!"      });
     });
-  }
+  },
 
+  bindAddToken: function() {
+    $(document).on('click', '.btn-addToken', App.handleAddToken);
+  },
+
+  handleAddToken: function(event) {
+    event.preventDefault();
+
+    var lotteryInstance;
+
+    web3.eth.getAccounts(function(error, accounts) {
+      if (error) {
+        console.log(error);
+      }
+    
+      var account = accounts[0];
+    
+      App.contracts.Lottery.deployed().then(function(instance) {
+        lotteryInstance = instance;
+    
+        // Execute adopt as a transaction by sending account
+        return lotteryInstance.addTokens({from: account});
+        
+      }).then(function(value){
+        var div = document.getElementById('addToken');
+        div.innerHTML="Token added to user successfully";
+      }).catch(function(err) {
+        var div = document.getElementById('addToken');
+        div.innerHTML="Error! Token not added!"      });
+    });
+  },
+
+  bindSubmitLottery: function() {
+    $(document).on('click', '.btn-submitLottery', App.handleSubmitLottery);
+  },
+  handleSubmitLottery: function(event) {
+    event.preventDefault();
+
+    var lotteryInstance;
+
+    web3.eth.getAccounts(function(error, accounts) {
+      if (error) {
+        console.log(error);
+      }
+    
+      var account = accounts[0];
+    
+      App.contracts.Lottery.deployed().then(function(instance) {
+        lotteryInstance = instance;
+    
+        // Execute adopt as a transaction by sending account
+        return lotteryInstance.registerLotteryNumbers(document.getElementById("day").value,document.getElementById("month").value,document.getElementById("year").value,
+                            document.getElementById("first").value,document.getElementById("second").value,document.getElementById("third").value,{from: account});
+        
+      }).then(function(value){
+        var div = document.getElementById('submitLabel');
+        div.innerHTML="lottery taken by user successfully";
+      }).catch(function(err) {
+        var div = document.getElementById('submitLabel');
+        div.innerHTML="Error! Lottery generation not successful!"      });
+    });
+  },
+
+  bindAdmin: function() {
+    $(document).on('click', '.btn-admin', App.handleAdmin);
+  },
+  handleAdmin: function(event) {
+    event.preventDefault();
+
+    var lotteryInstance;
+
+    web3.eth.getAccounts(function(error, accounts) {
+      if (error) {
+        console.log(error);
+      }
+    
+      var account = accounts[0];
+    
+      App.contracts.Lottery.deployed().then(function(instance) {
+        lotteryInstance = instance;
+    
+        // Execute adopt as a transaction by sending account
+        return lotteryInstance.getWinningLotteryNumbers({from: account});
+        
+      }).then(function(value){
+        var div = document.getElementById('adminLabel');
+        div.innerHTML="successful";
+      }).catch(function(err) {
+        var div = document.getElementById('adminLabel');
+        div.innerHTML="Error! Not admin!"      });
+    });
+  },
 };
 
 $(function() {

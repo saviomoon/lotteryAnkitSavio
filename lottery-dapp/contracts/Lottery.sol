@@ -70,16 +70,14 @@ contract Lottery{
      * the money held in contract is sent using a payable modifier function
      * money can be released using selfdestruct(address)
      **/
-	function addTokens() public payable 
+	function addTokens() public payable returns(uint)
 	{
-        uint tokensToAdd = msg.value/(10**18);
-    
         for(uint i = 0; i < mUsers.length; i++) 
         {
           if(mUsers[i].userAddress == msg.sender) 
           {
-            mUsers[i].tokensBought += tokensToAdd;
-            break;
+            mUsers[i].tokensBought = ++mUsers[i].tokensBought;
+            return mUsers[i].tokensBought;
           }
         }
 	}
@@ -121,6 +119,8 @@ contract Lottery{
                               if(mUsers[i].userAddress == msg.sender)
                               {
                                   mUsers[i].userLotteries.push(newLotteryNumber);
+                                  mUsers[i].tokensBought = --mUsers[i].tokensBought;
+
                                   return true;
                               }
                           }
